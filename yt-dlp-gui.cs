@@ -41,7 +41,17 @@ namespace Lafika
 		// Window closed event function
 		private static void Window_Closed(Object Sender, FormClosedEventArgs Arguments)
 		{
+			// Set the continue flag to false
 			Continue = false;
+			
+			// Get a list of processes which have the "yt-dlp" title
+			Process[] Process_List = Process.GetProcessesByName("yt-dlp");
+			
+			// Kill all processes in the list
+			foreach(Process Handle in Process_List)
+			{
+				Handle.Kill();
+			}
 		}
 		
 		// Process finished event function
@@ -102,7 +112,7 @@ namespace Lafika
 			
 			// Prepare the process start information
 			Process DLP = new Process();
-            DLP.StartInfo.UseShellExecute = false;
+			DLP.StartInfo.UseShellExecute = false;
 			DLP.StartInfo.FileName = "yt-dlp.exe";
 			DLP.StartInfo.Arguments = Parameters;
 			DLP.StartInfo.CreateNoWindow = true;
