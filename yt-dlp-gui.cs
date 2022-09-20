@@ -1,5 +1,6 @@
 // C# Standard library references
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -25,6 +26,7 @@ namespace Lafika
 	public class YT_DLP_GUI
 	{
 		// Internal data
+		private static Configuration Config;
 		private static bool Continue;
 		private static Form Window;
 		private static Font Regular;
@@ -54,6 +56,13 @@ namespace Lafika
 			{
 				Handle.Kill();
 			}
+			
+			// Save configuration data
+			Config.AppSettings.Settings["Last_Directory"].Value = Directory.Text;
+			Config.AppSettings.Settings["Last_Video"].Value = DownloadVideo.Checked.ToString();
+			Config.AppSettings.Settings["Last_Format"].Value = Format.SelectedIndex.ToString();
+			ConfigurationManager.RefreshSection(Config.AppSettings.SectionInformation.Name);
+			Config.Save(ConfigurationSaveMode.Modified);
 		}
 		
 		// Process finished event function
@@ -136,12 +145,15 @@ namespace Lafika
 			// Add the output directory to the parameters string
 			if(Directory.Text != "")
 			{
-				Parameters = Parameters + " --output " + Directory.Text + "\\" + "%(title)s.%(ext)s";
+				Parameters = Parameters + " --output " + "\"" + Directory.Text + "\\" + "%(title)s.%(ext)s\"";
 			}
 			else
 			{
-				Parameters = Parameters + " --output " + System.IO.Directory.GetCurrentDirectory() + "\\" + "%(title)s.%(ext)s";
+				Parameters = Parameters + " --output " + "\"" + System.IO.Directory.GetCurrentDirectory() + "\\" + "%(title)s.%(ext)s\"";
 			}
+			
+			
+			Console.WriteLine(Parameters);
 			
 			// Prepare the process start information
 			Process DLP = new Process();
@@ -178,6 +190,27 @@ namespace Lafika
 			{
 				MessageBox.Show("Could not find ffmpeg.exe!");
 				return 1;
+			}
+			
+			// Load program configuration
+			Config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+			
+			// Read last directory value
+			if(Config.AppSettings.Settings["Last_Directory"] == null)
+			{
+				Config.AppSettings.Settings.Add("Last_Directory", "");
+			}
+			
+			// Read last checkbox value
+			if(Config.AppSettings.Settings["Last_Video"] == null)
+			{
+				Config.AppSettings.Settings.Add("Last_Video", "True");
+			}
+			
+			// Read last format value
+			if(Config.AppSettings.Settings["Last_Format"] == null)
+			{
+				Config.AppSettings.Settings.Add("Last_Format", "0");
 			}
 			
 			// Enable modern visual styles
@@ -232,6 +265,7 @@ namespace Lafika
 			Directory.ReadOnly = true;
 			Directory.Click += Directory_Pressed;
 			Directory.Font = Small;
+			Directory.Text = Config.AppSettings.Settings["Last_Directory"].Value;
 			
 			// Create the format label
 			FormatLabel = new Label();
@@ -249,12 +283,27 @@ namespace Lafika
 			Format.Width = 64;
 			Format.Height = 24;
 			Format.Font = Small;
-			Format.Items.Add("webm");
-			Format.Items.Add("mp4");
-			Format.Items.Add("mkv");
-			Format.Items.Add("mov");
-			Format.Items.Add("avi");
-			Format.SelectedIndex = 0;
+			
+			// Display correct formats
+			if(Config.AppSettings.Settings["Last_Video"].Value == "True")
+			{
+				Format.Items.Add("webm");
+				Format.Items.Add("mp4");
+				Format.Items.Add("mkv");
+				Format.Items.Add("mov");
+				Format.Items.Add("avi");
+			}
+			else
+			{
+				Format.Items.Add("opus");
+				Format.Items.Add("vorbis");
+				Format.Items.Add("mp3");
+				Format.Items.Add("wav");
+				Format.Items.Add("flac");
+			}
+			
+			// Set the format index
+			Format.SelectedIndex = Convert.ToInt32(Config.AppSettings.Settings["Last_Format"].Value);
 			
 			// Create the download video label
 			DownloadVideoLabel = new Label();
@@ -271,7 +320,7 @@ namespace Lafika
 			DownloadVideo.Top = 124;
 			DownloadVideo.Width = 32;
 			DownloadVideo.Height = 32;
-			DownloadVideo.Checked = true;
+			DownloadVideo.Checked = Convert.ToBoolean(Config.AppSettings.Settings["Last_Video"].Value);
 			DownloadVideo.Click += Checkbox_Pressed;
 			
 			// Create the download button
