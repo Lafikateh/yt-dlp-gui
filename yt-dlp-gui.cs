@@ -136,7 +136,11 @@ namespace Lafika
 			// Add the output directory to the parameters string
 			if(Directory.Text != "")
 			{
-				Parameters = Parameters + " --output " + Directory.Text + "\\%(title)s.%(ext)s";
+				Parameters = Parameters + " --output " + Directory.Text + "\\" + "%(title)s.%(ext)s";
+			}
+			else
+			{
+				Parameters = Parameters + " --output " + System.IO.Directory.GetCurrentDirectory() + "\\" + "%(title)s.%(ext)s";
 			}
 			
 			// Prepare the process start information
