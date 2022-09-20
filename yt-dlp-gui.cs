@@ -33,6 +33,8 @@ namespace Lafika
 		private static TextBox Link;
 		private static Label DirectoryLabel;
 		private static TextBox Directory;
+		private static Label FormatLabel;
+		private static ComboBox Format;
 		private static Label DownloadVideoLabel;
 		private static CheckBox DownloadVideo;
 		private static Button Download;
@@ -81,6 +83,33 @@ namespace Lafika
 			}
 		}
 		
+		// Download video checkbox pressed event function
+		private static void Checkbox_Pressed(Object Sender, EventArgs Arguments)
+		{
+			if(DownloadVideo.Checked == true)
+			{
+				Format.Items.Clear();
+				Format.ResetText();
+				Format.Items.Add("webm");
+				Format.Items.Add("mp4");
+				Format.Items.Add("mkv");
+				Format.Items.Add("mov");
+				Format.Items.Add("avi");
+				Format.SelectedIndex = 0;
+			}
+			else
+			{
+				Format.Items.Clear();
+				Format.ResetText();
+				Format.Items.Add("opus");
+				Format.Items.Add("vorbis");
+				Format.Items.Add("mp3");
+				Format.Items.Add("wav");
+				Format.Items.Add("flac");
+				Format.SelectedIndex = 0;
+			}
+		}
+		
 		// Download button pressed event function
 		private static void Download_Pressed(Object Sender, EventArgs Arguments)
 		{
@@ -97,11 +126,11 @@ namespace Lafika
 			string Parameters = "--no-playlist ";
 			if(DownloadVideo.Checked == true)
 			{
-				Parameters = Parameters + Link.Text;
+				Parameters = Parameters + "--recode-video " + Format.SelectedText + " " + Link.Text;
 			}
 			else
 			{
-				Parameters = Parameters + "--extract-audio " + Link.Text;
+				Parameters = Parameters + "--extract-audio --audio-format " + Format.SelectedText + " " + Link.Text;
 			}
 			
 			// Add the output directory to the parameters string
@@ -154,8 +183,10 @@ namespace Lafika
 			Window = new Form();
 			Window.Width = 560;
 			Window.Height = 288;
+			Window.MaximizeBox = false;
+			Window.FormBorderStyle = FormBorderStyle.FixedSingle;
 			Window.FormClosed += Window_Closed;
-			Window.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetEntryAssembly().Location);
+			Window.Icon = Icon.ExtractAssociatedIcon(Assembly.GetEntryAssembly().Location);
 			Window.Text = "GUI for yt-dlp.exe";
 			
 			// Create fonts
@@ -198,6 +229,29 @@ namespace Lafika
 			Directory.Click += Directory_Pressed;
 			Directory.Font = Small;
 			
+			// Create the format label
+			FormatLabel = new Label();
+			FormatLabel.Left = 224;
+			FormatLabel.Top = 128;
+			FormatLabel.Width = 80;
+			FormatLabel.Height = 24;
+			FormatLabel.Font = Regular;
+			FormatLabel.Text = "Format:";
+			
+			// Create the format box
+			Format = new ComboBox();
+			Format.Left = 308;
+			Format.Top = 128;
+			Format.Width = 64;
+			Format.Height = 24;
+			Format.Font = Small;
+			Format.Items.Add("webm");
+			Format.Items.Add("mp4");
+			Format.Items.Add("mkv");
+			Format.Items.Add("mov");
+			Format.Items.Add("avi");
+			Format.SelectedIndex = 0;
+			
 			// Create the download video label
 			DownloadVideoLabel = new Label();
 			DownloadVideoLabel.Left = 16;
@@ -214,6 +268,7 @@ namespace Lafika
 			DownloadVideo.Width = 32;
 			DownloadVideo.Height = 32;
 			DownloadVideo.Checked = true;
+			DownloadVideo.Click += Checkbox_Pressed;
 			
 			// Create the download button
 			Download = new Button();
@@ -239,6 +294,8 @@ namespace Lafika
 			Window.Controls.Add(Link);
 			Window.Controls.Add(DirectoryLabel);
 			Window.Controls.Add(Directory);
+			Window.Controls.Add(FormatLabel);
+			Window.Controls.Add(Format);
 			Window.Controls.Add(DownloadVideoLabel);
 			Window.Controls.Add(DownloadVideo);
 			Window.Controls.Add(Download);
