@@ -152,9 +152,6 @@ namespace Lafika
 				Parameters = Parameters + " --output " + "\"" + System.IO.Directory.GetCurrentDirectory() + "\\" + "%(title)s.%(ext)s\"";
 			}
 			
-			
-			Console.WriteLine(Parameters);
-			
 			// Prepare the process start information
 			Process DLP = new Process();
 			DLP.StartInfo.UseShellExecute = false;
